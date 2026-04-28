@@ -1,0 +1,282 @@
+const GROUP_OPTIONS = [
+  "抗血小板",
+  "抗凝血/溶栓/止血",
+  "造血系統",
+  "全部混合"
+];
+
+const FIELD_OPTIONS = [
+  { key: "mechanism", label: "機轉/標的" },
+  { key: "indication", label: "適應症" },
+  { key: "pitfall", label: "副作用 / 禁忌" },
+  { key: "reversal", label: "解毒 / 逆轉" },
+  { key: "monitoring", label: "監測 / 注意事項" },
+  { key: "keyPoint", label: "考點速記" }
+];
+
+const MIXED_LIMIT = 16;
+
+let currentGroup = "抗血小板";
+let currentField = "mechanism";
+let currentPairs = [];
+let matchedCount = 0;
+let errorCount = 0;
+let selectedClue = null;
+let selectedAnswer = null;
+let answerMode = false;
+
+const elements = {
+  groupChips: document.getElementById("groupChips"),
+  fieldChips: document.getElementById("fieldChips"),
+  clueCol: document.getElementById("clueCol"),
+  answerCol: document.getElementById("answerCol"),
+  progressText: document.getElementById("progressText"),
+  errorText: document.getElementById("errorText"),
+  modeText: document.getElementById("modeText"),
+  statusNote: document.getElementById("statusNote"),
+  quizView: document.getElementById("quizView"),
+  answerView: document.getElementById("answerView"),
+  answerCaption: document.getElementById("answerCaption"),
+  answerBody: document.getElementById("answerBody"),
+  fieldHeader: document.getElementById("fieldHeader"),
+  toggleAnswerBtn: document.getElementById("toggleAnswerBtn"),
+  resultCard: document.getElementById("resultCard"),
+  resultScore: document.getElementById("resultScore"),
+  resultText: document.getElementById("resultText"),
+  resetBtn: document.getElementById("resetBtn"),
+  playAgainBtn: document.getElementById("playAgainBtn")
+};
+
+function shuffle(list) {
+  return [...list].sort(() => Math.random() - 0.5);
+}
+
+function getFieldLabel() {
+  return FIELD_OPTIONS.find((item) => item.key === currentField)?.label ?? currentField;
+}
+
+function buildPool() {
+  let rows = QUIZ_ROWS;
+  if (currentGroup !== "全部混合") {
+    rows = rows.filter((row) => row.group === currentGroup);
+  }
+  rows = rows.filter((row) => row[currentField] && row[currentField].trim().length > 0);
+  if (currentGroup === "全部混合" && rows.length > MIXED_LIMIT) {
+    rows = shuffle(rows).slice(0, MIXED_LIMIT);
+  }
+  return rows.map((row, index) => ({
+    id: `${row.group}-${row.drug}-${index}`,
+    drug: row.drug,
+    clue: row[currentField],
+    keyPoint: row.keyPoint,
+    group: row.group
+  }));
+}
+
+function setStatusNote() {
+  const fieldLabel = getFieldLabel();
+  const mixedNote = currentGroup === "全部混合"
+    ? `全部混合模式會從三大群組隨機抽出 ${Math.min(MIXED_LIMIT, currentPairs.length)} 題，避免一次題目過長。`
+    : `${currentGroup} 目前共有 ${currentPairs.length} 題，正在練習「${fieldLabel}」欄位。`;
+  elements.statusNote.textContent = mixedNote;
+  elements.modeText.textContent = `${currentGroup} × ${fieldLabel}`;
+}
+
+function updateStats() {
+  elements.progressText.textContent = `${matchedCount} / ${currentPairs.length}`;
+  elements.errorText.textContent = String(errorCount);
+}
+
+function createChip(text, isActive, onClick) {
+  const button = document.createElement("button");
+  button.className = `chip${isActive ? " active" : ""}`;
+  button.textContent = text;
+  button.addEventListener("click", onClick);
+  return button;
+}
+
+function renderFilters() {
+  elements.groupChips.innerHTML = "";
+  GROUP_OPTIONS.forEach((group) => {
+    elements.groupChips.appendChild(
+      createChip(group, group === currentGroup, () => {
+        currentGroup = group;
+        hideAnswers();
+        startRound();
+      })
+    );
+  });
+
+  elements.fieldChips.innerHTML = "";
+  FIELD_OPTIONS.forEach((field) => {
+    elements.fieldChips.appendChild(
+      createChip(field.label, field.key === currentField, () => {
+        currentField = field.key;
+        hideAnswers();
+        startRound();
+      })
+    );
+  });
+}
+
+function makeTile(text, id, type) {
+  const tile = document.createElement("button");
+  tile.className = "tile";
+  tile.type = "button";
+  tile.textContent = text;
+  tile.dataset.id = id;
+  tile.dataset.type = type;
+  tile.addEventListener("click", () => onTileClick(tile));
+  return tile;
+}
+
+function renderBoard() {
+  elements.clueCol.innerHTML = "";
+  elements.answerCol.innerHTML = "";
+
+  const clueTiles = shuffle(currentPairs.map((pair) => ({
+    id: pair.id,
+    text: pair.clue
+  })));
+  const answerTiles = shuffle(currentPairs.map((pair) => ({
+    id: pair.id,
+    text: pair.drug
+  })));
+
+  clueTiles.forEach((item) => elements.clueCol.appendChild(makeTile(item.text, item.id, "clue")));
+  answerTiles.forEach((item) => elements.answerCol.appendChild(makeTile(item.text, item.id, "answer")));
+}
+
+function clearSelection(type) {
+  document.querySelectorAll(`.tile[data-type="${type}"].selected`).forEach((tile) => {
+    tile.classList.remove("selected");
+  });
+}
+
+function onTileClick(tile) {
+  if (tile.classList.contains("matched") || tile.classList.contains("wrong")) {
+    return;
+  }
+
+  if (tile.dataset.type === "clue") {
+    clearSelection("clue");
+    tile.classList.add("selected");
+    selectedClue = tile;
+  } else {
+    clearSelection("answer");
+    tile.classList.add("selected");
+    selectedAnswer = tile;
+  }
+
+  if (selectedClue && selectedAnswer) {
+    resolveMatch();
+  }
+}
+
+function resolveMatch() {
+  const clueTile = selectedClue;
+  const answerTile = selectedAnswer;
+  selectedClue = null;
+  selectedAnswer = null;
+
+  if (clueTile.dataset.id === answerTile.dataset.id) {
+    clueTile.classList.remove("selected");
+    answerTile.classList.remove("selected");
+    clueTile.classList.add("matched");
+    answerTile.classList.add("matched");
+    matchedCount += 1;
+    updateStats();
+    if (matchedCount === currentPairs.length) {
+      window.setTimeout(showResult, 260);
+    }
+    return;
+  }
+
+  errorCount += 1;
+  clueTile.classList.remove("selected");
+  answerTile.classList.remove("selected");
+  clueTile.classList.add("wrong");
+  answerTile.classList.add("wrong");
+  updateStats();
+  window.setTimeout(() => {
+    clueTile.classList.remove("wrong");
+    answerTile.classList.remove("wrong");
+  }, 350);
+}
+
+function showResult() {
+  const score = Math.round((currentPairs.length / (currentPairs.length + errorCount || 1)) * 100);
+  elements.resultScore.textContent = `${score}%`;
+  if (errorCount === 0) {
+    elements.resultText.textContent = "全對。這組資訊已經很穩了，可以換下一個欄位或群組。";
+  } else if (score >= 75) {
+    elements.resultText.textContent = `答對 ${currentPairs.length} 題、失誤 ${errorCount} 次。再刷一次就會更穩。`;
+  } else {
+    elements.resultText.textContent = `這輪失誤 ${errorCount} 次，建議先切到「顯示答案」快速對照，再回來重刷。`;
+  }
+  elements.resultCard.classList.remove("hidden");
+}
+
+function renderAnswers() {
+  elements.answerBody.innerHTML = "";
+  elements.fieldHeader.textContent = getFieldLabel();
+  elements.answerCaption.textContent = `${currentGroup}｜${getFieldLabel()}｜共 ${currentPairs.length} 題`;
+
+  currentPairs.forEach((pair) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${pair.drug}</td>
+      <td>${pair.clue}</td>
+      <td>${pair.keyPoint}</td>
+    `;
+    elements.answerBody.appendChild(row);
+  });
+}
+
+function hideAnswers() {
+  answerMode = false;
+  elements.answerView.classList.add("hidden");
+  elements.quizView.classList.remove("hidden");
+  elements.toggleAnswerBtn.textContent = "顯示答案";
+}
+
+function showAnswers() {
+  answerMode = true;
+  renderAnswers();
+  elements.quizView.classList.add("hidden");
+  elements.answerView.classList.remove("hidden");
+  elements.toggleAnswerBtn.textContent = "返回配對";
+}
+
+function startRound() {
+  currentPairs = buildPool();
+  matchedCount = 0;
+  errorCount = 0;
+  selectedClue = null;
+  selectedAnswer = null;
+  elements.resultCard.classList.add("hidden");
+  renderFilters();
+  renderBoard();
+  updateStats();
+  setStatusNote();
+}
+
+elements.resetBtn.addEventListener("click", () => {
+  hideAnswers();
+  startRound();
+});
+
+elements.playAgainBtn.addEventListener("click", () => {
+  hideAnswers();
+  startRound();
+});
+
+elements.toggleAnswerBtn.addEventListener("click", () => {
+  if (answerMode) {
+    hideAnswers();
+    return;
+  }
+  showAnswers();
+});
+
+startRound();
