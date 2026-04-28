@@ -1,22 +1,23 @@
-const GROUP_OPTIONS = [
-  "抗血小板",
-  "抗凝血/溶栓/止血",
-  "造血系統",
-  "全部混合"
-];
-
+const MIXED_GROUP = "全部混合";
+const GROUP_ORDER = ["抗血小板", "抗凝血/溶栓/止血", "造血系統"];
 const FIELD_OPTIONS = [
   { key: "mechanism", label: "機轉/標的" },
   { key: "indication", label: "適應症" },
-  { key: "pitfall", label: "副作用 / 禁忌" },
-  { key: "reversal", label: "解毒 / 逆轉" },
-  { key: "monitoring", label: "監測 / 注意事項" },
-  { key: "keyPoint", label: "考點速記" }
+  { key: "pitfall", label: "副作用/禁忌" },
+  { key: "reversal", label: "解毒/逆轉" },
+  { key: "monitoring", label: "監測/注意事項" },
+  { key: "keyPoint", label: "考點" }
 ];
-
 const MIXED_LIMIT = 16;
 
-let currentGroup = "全部混合";
+const groupsFromData = [...new Set(QUIZ_ROWS.map((row) => row.group).filter(Boolean))];
+const GROUP_OPTIONS = [
+  ...GROUP_ORDER.filter((group) => groupsFromData.includes(group)),
+  ...groupsFromData.filter((group) => !GROUP_ORDER.includes(group)),
+  MIXED_GROUP
+];
+
+let currentGroup = MIXED_GROUP;
 let currentField = "mechanism";
 let currentPairs = [];
 let matchedCount = 0;
@@ -30,6 +31,7 @@ const elements = {
   fieldChips: document.getElementById("fieldChips"),
   clueCol: document.getElementById("clueCol"),
   answerCol: document.getElementById("answerCol"),
+  statusBar: document.getElementById("statusBar"),
   progressText: document.getElementById("progressText"),
   errorText: document.getElementById("errorText"),
   quizView: document.getElementById("quizView"),
@@ -54,19 +56,23 @@ function getFieldLabel() {
 
 function buildPool() {
   let rows = QUIZ_ROWS;
-  if (currentGroup !== "全部混合") {
+  if (currentGroup !== MIXED_GROUP) {
     rows = rows.filter((row) => row.group === currentGroup);
   }
-  rows = rows.filter((row) => row[currentField] && row[currentField].trim().length > 0);
-  if (currentGroup === "全部混合" && rows.length > MIXED_LIMIT) {
+
+  rows = rows.filter((row) => {
+    const value = row[currentField];
+    return typeof value === "string" && value.trim().length > 0;
+  });
+
+  if (currentGroup === MIXED_GROUP && rows.length > MIXED_LIMIT) {
     rows = shuffle(rows).slice(0, MIXED_LIMIT);
   }
+
   return rows.map((row, index) => ({
     id: `${row.group}-${row.drug}-${index}`,
     drug: row.drug,
-    clue: row[currentField],
-    keyPoint: row.keyPoint,
-    group: row.group
+    clue: row[currentField]
   }));
 }
 
@@ -194,16 +200,19 @@ function resolveMatch() {
 }
 
 function showResult() {
-  const score = Math.round((currentPairs.length / (currentPairs.length + errorCount || 1)) * 100);
+  const total = currentPairs.length;
+  const score = Math.round((total / ((total + errorCount) || 1)) * 100);
   elements.resultScore.textContent = `${score}%`;
   elements.resultScore.className = `big ${errorCount === 0 ? "perfect" : score >= 75 ? "good" : "bad"}`;
+
   if (errorCount === 0) {
-    elements.resultText.textContent = "全對。這組資訊已經很穩了，可以換下一個欄位或群組。";
+    elements.resultText.textContent = "這輪完全答對，可以直接往下一欄位刷。";
   } else if (score >= 75) {
-    elements.resultText.textContent = `答對 ${currentPairs.length} 題、失誤 ${errorCount} 次。再刷一次就會更穩。`;
+    elements.resultText.textContent = `共 ${total} 題，錯 ${errorCount} 次，再刷一次就很穩。`;
   } else {
-    elements.resultText.textContent = `這輪失誤 ${errorCount} 次，建議先切到「顯示答案」快速對照，再回來重刷。`;
+    elements.resultText.textContent = `共 ${total} 題，錯 ${errorCount} 次，建議先切到顯示答案把重點再看一遍。`;
   }
+
   elements.resultCard.classList.add("show");
 }
 
@@ -211,30 +220,52 @@ function renderAnswers() {
   elements.answerBody.innerHTML = "";
   elements.fieldHeader.textContent = getFieldLabel();
 
+  if (currentPairs.length === 0) {
+    const emptyRow = document.createElement("tr");
+    const emptyCell = document.createElement("td");
+    emptyCell.colSpan = 2;
+    emptyCell.textContent = "目前這個欄位沒有可顯示的資料。";
+    emptyRow.appendChild(emptyCell);
+    elements.answerBody.appendChild(emptyRow);
+    return;
+  }
+
   currentPairs.forEach((pair) => {
     const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${pair.clue}</td>
-      <td>${pair.drug}</td>
-    `;
+    const clueCell = document.createElement("td");
+    const drugCell = document.createElement("td");
+    clueCell.textContent = pair.clue;
+    drugCell.textContent = pair.drug;
+    row.appendChild(clueCell);
+    row.appendChild(drugCell);
     elements.answerBody.appendChild(row);
   });
 }
 
+function setAnswerMode(nextMode) {
+  answerMode = nextMode;
+  if (answerMode) {
+    renderAnswers();
+  }
+
+  elements.quizView.classList.toggle("hidden", answerMode);
+  elements.statusBar.classList.toggle("hidden", answerMode);
+  elements.answerView.classList.toggle("hidden", !answerMode);
+  elements.resultCard.classList.remove("show");
+  elements.toggleAnswerBtn.textContent = answerMode ? "返回配對" : "顯示答案";
+  elements.toggleAnswerBtn.setAttribute("aria-pressed", answerMode ? "true" : "false");
+
+  if (answerMode) {
+    elements.answerView.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
 function hideAnswers() {
-  answerMode = false;
-  elements.answerView.classList.remove("show");
-  elements.quizView.classList.remove("hidden");
-  elements.toggleAnswerBtn.textContent = "顯示答案";
+  setAnswerMode(false);
 }
 
 function showAnswers() {
-  answerMode = true;
-  renderAnswers();
-  elements.quizView.classList.add("hidden");
-  elements.answerView.classList.add("show");
-  elements.resultCard.classList.remove("show");
-  elements.toggleAnswerBtn.textContent = "返回配對";
+  setAnswerMode(true);
 }
 
 function startRound() {

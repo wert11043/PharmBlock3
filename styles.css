@@ -249,13 +249,8 @@ header p {
 }
 
 #answerView {
-  display: none;
   max-width: 960px;
   margin: 0 auto;
-}
-
-#answerView.show {
-  display: block;
 }
 
 .answer-table {
