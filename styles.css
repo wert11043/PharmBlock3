@@ -8,7 +8,7 @@
   --border: #e2e8f0;
   --text: #1e293b;
   --muted: #64748b;
-  --accent: #d97706;
+  --group: #0f766e;
 }
 
 * {
@@ -31,7 +31,7 @@ header {
 }
 
 header h1 {
-  font-size: 1.45rem;
+  font-size: 1.4rem;
   font-weight: 800;
   color: var(--primary);
 }
@@ -43,19 +43,23 @@ header p {
   line-height: 1.45;
 }
 
-.filters {
+.picker-band {
   max-width: 960px;
-  margin: 0 auto 0.85rem;
+  margin: 0 auto;
 }
 
-.filter-label {
+.picker-label {
   text-align: center;
   font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   color: var(--muted);
   font-weight: 700;
-  margin: 0.25rem 0 0.4rem;
+  margin: 0.2rem 0 0.35rem;
+}
+
+.picker-label.second {
+  margin-top: 0.1rem;
 }
 
 .categories {
@@ -63,11 +67,11 @@ header p {
   flex-wrap: wrap;
   gap: 0.5rem;
   justify-content: center;
-  margin: 0 0 0.75rem;
+  margin: 0.75rem 0 0.7rem;
 }
 
 .cat-btn {
-  padding: 0.42rem 0.92rem;
+  padding: 0.4rem 0.9rem;
   border: 2px solid var(--border);
   border-radius: 999px;
   background: var(--card);
@@ -89,9 +93,9 @@ header p {
   border-color: var(--primary);
 }
 
-.categories.secondary .cat-btn.active {
-  background: var(--selected);
-  border-color: var(--selected);
+.categories-secondary .cat-btn.active {
+  background: var(--group);
+  border-color: var(--group);
 }
 
 .toolbar {
@@ -119,23 +123,19 @@ header p {
 }
 
 .tool-btn.answer-btn {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: #d97706;
+  color: #d97706;
 }
 
 .tool-btn.answer-btn:hover {
   background: #fffbeb;
 }
 
-.status-card {
-  max-width: 960px;
-  margin: 0 auto 0.9rem;
-}
-
 .status {
   text-align: center;
   font-size: 0.82rem;
   color: var(--muted);
+  margin-bottom: 0.2rem;
 }
 
 .status b {
@@ -146,7 +146,7 @@ header p {
   text-align: center;
   font-size: 0.79rem;
   color: var(--muted);
-  margin-top: 0.28rem;
+  margin-bottom: 0.75rem;
   line-height: 1.45;
 }
 
@@ -181,14 +181,14 @@ header p {
   background: var(--card);
   cursor: pointer;
   font-size: 0.82rem;
-  line-height: 1.5;
+  line-height: 1.48;
   transition: border-color 0.12s, background 0.12s, opacity 0.12s;
   user-select: none;
-  min-height: 2.8rem;
+  min-height: 2.9rem;
   text-align: left;
 }
 
-.tile:hover:not(.matched):not(.wrong) {
+.tile:hover:not(.matched):not(.flashing) {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
@@ -203,10 +203,10 @@ header p {
   background: #f0fdf4;
   color: var(--correct);
   cursor: default;
-  opacity: 0.78;
+  opacity: 0.75;
 }
 
-.tile.wrong {
+.tile.flashing {
   border-color: var(--wrong);
   background: #fef2f2;
   animation: shake 0.35s ease;
@@ -219,6 +219,7 @@ header p {
 }
 
 .result {
+  display: none;
   text-align: center;
   max-width: 420px;
   margin: 1.5rem auto 0;
@@ -229,11 +230,26 @@ header p {
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
 }
 
+.result.show {
+  display: block;
+}
+
 .result .big {
   font-size: 3.5rem;
   font-weight: 900;
   line-height: 1;
-  color: var(--primary);
+}
+
+.result .big.perfect {
+  color: var(--correct);
+}
+
+.result .big.good {
+  color: #d97706;
+}
+
+.result .big.bad {
+  color: var(--wrong);
 }
 
 .result p {
@@ -260,8 +276,13 @@ header p {
 }
 
 #answerView {
+  display: none;
   max-width: 960px;
-  margin: 1rem auto 0;
+  margin: 0 auto;
+}
+
+#answerView.show {
+  display: block;
 }
 
 .answer-caption {
@@ -275,13 +296,12 @@ header p {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.82rem;
-  background: var(--card);
 }
 
 .answer-table th {
   background: var(--primary);
   color: #fff;
-  padding: 0.55rem 0.75rem;
+  padding: 0.5rem 0.75rem;
   text-align: left;
   font-weight: 700;
   font-size: 0.75rem;
@@ -297,10 +317,11 @@ header p {
 }
 
 .answer-table td {
-  padding: 0.6rem 0.75rem;
+  padding: 0.58rem 0.75rem;
   border-bottom: 1px solid var(--border);
   vertical-align: top;
-  line-height: 1.5;
+  line-height: 1.48;
+  background: var(--card);
 }
 
 .answer-table tr:nth-child(even) td {
@@ -311,9 +332,8 @@ header p {
   border-bottom: none;
 }
 
-.answer-table td:first-child {
-  font-weight: 700;
-  color: var(--primary);
+.answer-table td:first-child,
+.answer-table td:last-child {
   white-space: nowrap;
 }
 
@@ -332,15 +352,12 @@ header p {
     font-size: 0.79rem;
   }
 
-  .toolbar {
-    flex-direction: column;
-    align-items: stretch;
-    max-width: 320px;
-    margin-left: auto;
-    margin-right: auto;
+  .answer-table td:first-child,
+  .answer-table td:last-child {
+    white-space: normal;
   }
 
-  .answer-table td:first-child {
-    white-space: normal;
+  .toolbar {
+    flex-wrap: wrap;
   }
 }

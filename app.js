@@ -155,7 +155,7 @@ function clearSelection(type) {
 }
 
 function onTileClick(tile) {
-  if (tile.classList.contains("matched") || tile.classList.contains("wrong")) {
+  if (tile.classList.contains("matched") || tile.classList.contains("flashing")) {
     return;
   }
 
@@ -196,18 +196,19 @@ function resolveMatch() {
   errorCount += 1;
   clueTile.classList.remove("selected");
   answerTile.classList.remove("selected");
-  clueTile.classList.add("wrong");
-  answerTile.classList.add("wrong");
+  clueTile.classList.add("flashing");
+  answerTile.classList.add("flashing");
   updateStats();
   window.setTimeout(() => {
-    clueTile.classList.remove("wrong");
-    answerTile.classList.remove("wrong");
+    clueTile.classList.remove("flashing");
+    answerTile.classList.remove("flashing");
   }, 350);
 }
 
 function showResult() {
   const score = Math.round((currentPairs.length / (currentPairs.length + errorCount || 1)) * 100);
   elements.resultScore.textContent = `${score}%`;
+  elements.resultScore.className = `big ${errorCount === 0 ? "perfect" : score >= 75 ? "good" : "bad"}`;
   if (errorCount === 0) {
     elements.resultText.textContent = "全對。這組資訊已經很穩了，可以換下一個欄位或群組。";
   } else if (score >= 75) {
@@ -215,7 +216,7 @@ function showResult() {
   } else {
     elements.resultText.textContent = `這輪失誤 ${errorCount} 次，建議先切到「顯示答案」快速對照，再回來重刷。`;
   }
-  elements.resultCard.classList.remove("hidden");
+  elements.resultCard.classList.add("show");
 }
 
 function renderAnswers() {
@@ -236,7 +237,7 @@ function renderAnswers() {
 
 function hideAnswers() {
   answerMode = false;
-  elements.answerView.classList.add("hidden");
+  elements.answerView.classList.remove("show");
   elements.quizView.classList.remove("hidden");
   elements.toggleAnswerBtn.textContent = "顯示答案";
 }
@@ -245,7 +246,8 @@ function showAnswers() {
   answerMode = true;
   renderAnswers();
   elements.quizView.classList.add("hidden");
-  elements.answerView.classList.remove("hidden");
+  elements.answerView.classList.add("show");
+  elements.resultCard.classList.remove("show");
   elements.toggleAnswerBtn.textContent = "返回配對";
 }
 
@@ -255,7 +257,7 @@ function startRound() {
   errorCount = 0;
   selectedClue = null;
   selectedAnswer = null;
-  elements.resultCard.classList.add("hidden");
+  elements.resultCard.classList.remove("show");
   renderFilters();
   renderBoard();
   updateStats();

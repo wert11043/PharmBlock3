@@ -9,14 +9,14 @@
 <body>
   <header>
     <h1>藥理 Block 3 配合題</h1>
-    <p>Pharmacology Matching Quiz — 點選左欄線索，再點右欄藥物；上方可切換藥物群組與練習欄位</p>
+    <p>Pharmacology Matching Quiz — 點選左欄線索，再點右欄藥物配對</p>
   </header>
 
-  <div class="filters">
-    <div class="filter-label">藥物群組</div>
-    <div class="categories" id="groupChips"></div>
-    <div class="filter-label">練習欄位</div>
-    <div class="categories secondary" id="fieldChips"></div>
+  <div class="picker-band">
+    <div class="picker-label">練習欄位</div>
+    <div class="categories" id="fieldChips"></div>
+    <div class="picker-label second">藥物群組</div>
+    <div class="categories categories-secondary" id="groupChips"></div>
   </div>
 
   <div class="toolbar">
@@ -24,12 +24,10 @@
     <button class="tool-btn answer-btn" id="toggleAnswerBtn">顯示答案</button>
   </div>
 
-  <div class="status-card">
-    <div class="status" id="statusBar">
-      目前模式 <b id="modeText"></b> &nbsp;｜&nbsp; 進度 <b id="progressText">0 / 0</b> &nbsp;｜&nbsp; 錯誤 <b id="errorText">0</b>
-    </div>
-    <div class="status-note" id="statusNote"></div>
+  <div class="status" id="statusBar">
+    目前模式 <b id="modeText"></b> &nbsp;｜&nbsp; 進度 <b id="progressText">0 / 0</b> &nbsp;｜&nbsp; 錯誤 <b id="errorText">0</b>
   </div>
+  <div class="status-note" id="statusNote"></div>
 
   <div class="grid" id="quizView">
     <div>
@@ -42,13 +40,13 @@
     </div>
   </div>
 
-  <div class="result hidden" id="resultCard">
+  <div class="result" id="resultCard">
     <div class="big" id="resultScore">100%</div>
     <p id="resultText"></p>
     <button id="playAgainBtn">再試一次</button>
   </div>
 
-  <div id="answerView" class="hidden">
+  <div id="answerView">
     <div class="answer-caption" id="answerCaption"></div>
     <table class="answer-table">
       <thead>
