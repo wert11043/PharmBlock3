@@ -16,7 +16,7 @@ const FIELD_OPTIONS = [
 
 const MIXED_LIMIT = 16;
 
-let currentGroup = "抗血小板";
+let currentGroup = "全部混合";
 let currentField = "mechanism";
 let currentPairs = [];
 let matchedCount = 0;
@@ -32,11 +32,8 @@ const elements = {
   answerCol: document.getElementById("answerCol"),
   progressText: document.getElementById("progressText"),
   errorText: document.getElementById("errorText"),
-  modeText: document.getElementById("modeText"),
-  statusNote: document.getElementById("statusNote"),
   quizView: document.getElementById("quizView"),
   answerView: document.getElementById("answerView"),
-  answerCaption: document.getElementById("answerCaption"),
   answerBody: document.getElementById("answerBody"),
   fieldHeader: document.getElementById("fieldHeader"),
   toggleAnswerBtn: document.getElementById("toggleAnswerBtn"),
@@ -71,15 +68,6 @@ function buildPool() {
     keyPoint: row.keyPoint,
     group: row.group
   }));
-}
-
-function setStatusNote() {
-  const fieldLabel = getFieldLabel();
-  const mixedNote = currentGroup === "全部混合"
-    ? `全部混合模式會從三大群組隨機抽出 ${Math.min(MIXED_LIMIT, currentPairs.length)} 題，避免一次題目過長。`
-    : `${currentGroup} 目前共有 ${currentPairs.length} 題，正在練習「${fieldLabel}」欄位。`;
-  elements.statusNote.textContent = mixedNote;
-  elements.modeText.textContent = `${currentGroup} × ${fieldLabel}`;
 }
 
 function updateStats() {
@@ -222,14 +210,12 @@ function showResult() {
 function renderAnswers() {
   elements.answerBody.innerHTML = "";
   elements.fieldHeader.textContent = getFieldLabel();
-  elements.answerCaption.textContent = `${currentGroup}｜${getFieldLabel()}｜共 ${currentPairs.length} 題`;
 
   currentPairs.forEach((pair) => {
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${pair.drug}</td>
       <td>${pair.clue}</td>
-      <td>${pair.keyPoint}</td>
+      <td>${pair.drug}</td>
     `;
     elements.answerBody.appendChild(row);
   });
@@ -261,7 +247,6 @@ function startRound() {
   renderFilters();
   renderBoard();
   updateStats();
-  setStatusNote();
 }
 
 elements.resetBtn.addEventListener("click", () => {

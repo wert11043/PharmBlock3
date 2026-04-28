@@ -12,12 +12,8 @@
     <p>Pharmacology Matching Quiz — 點選左欄線索，再點右欄藥物配對</p>
   </header>
 
-  <div class="picker-band">
-    <div class="picker-label">練習欄位</div>
-    <div class="categories" id="fieldChips"></div>
-    <div class="picker-label second">藥物群組</div>
-    <div class="categories categories-secondary" id="groupChips"></div>
-  </div>
+  <div class="categories" id="fieldChips"></div>
+  <div class="categories categories-secondary" id="groupChips"></div>
 
   <div class="toolbar">
     <button class="tool-btn" id="resetBtn">重新練習</button>
@@ -25,9 +21,8 @@
   </div>
 
   <div class="status" id="statusBar">
-    目前模式 <b id="modeText"></b> &nbsp;｜&nbsp; 進度 <b id="progressText">0 / 0</b> &nbsp;｜&nbsp; 錯誤 <b id="errorText">0</b>
+    進度 <b id="progressText">0 / 0</b> &nbsp;｜&nbsp; 錯誤 <b id="errorText">0</b>
   </div>
-  <div class="status-note" id="statusNote"></div>
 
   <div class="grid" id="quizView">
     <div>
@@ -47,15 +42,8 @@
   </div>
 
   <div id="answerView">
-    <div class="answer-caption" id="answerCaption"></div>
-    <table class="answer-table">
-      <thead>
-        <tr>
-          <th>藥物</th>
-          <th id="fieldHeader">欄位</th>
-          <th>考點速記</th>
-        </tr>
-      </thead>
+    <table class="answer-table" id="answerTable">
+      <thead><tr><th id="fieldHeader">線索 / 提示</th><th>藥物</th></tr></thead>
       <tbody id="answerBody"></tbody>
     </table>
   </div>

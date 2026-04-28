@@ -43,25 +43,6 @@ header p {
   line-height: 1.45;
 }
 
-.picker-band {
-  max-width: 960px;
-  margin: 0 auto;
-}
-
-.picker-label {
-  text-align: center;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-  font-weight: 700;
-  margin: 0.2rem 0 0.35rem;
-}
-
-.picker-label.second {
-  margin-top: 0.1rem;
-}
-
 .categories {
   display: flex;
   flex-wrap: wrap;
@@ -135,19 +116,11 @@ header p {
   text-align: center;
   font-size: 0.82rem;
   color: var(--muted);
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.75rem;
 }
 
 .status b {
   color: var(--text);
-}
-
-.status-note {
-  text-align: center;
-  font-size: 0.79rem;
-  color: var(--muted);
-  margin-bottom: 0.75rem;
-  line-height: 1.45;
 }
 
 .grid {
@@ -285,13 +258,6 @@ header p {
   display: block;
 }
 
-.answer-caption {
-  text-align: center;
-  color: var(--muted);
-  font-size: 0.82rem;
-  margin-bottom: 0.45rem;
-}
-
 .answer-table {
   width: 100%;
   border-collapse: collapse;
@@ -332,11 +298,6 @@ header p {
   border-bottom: none;
 }
 
-.answer-table td:first-child,
-.answer-table td:last-child {
-  white-space: nowrap;
-}
-
 .hidden {
   display: none !important;
 }
@@ -350,11 +311,6 @@ header p {
 @media (max-width: 560px) {
   .tile {
     font-size: 0.79rem;
-  }
-
-  .answer-table td:first-child,
-  .answer-table td:last-child {
-    white-space: normal;
   }
 
   .toolbar {
