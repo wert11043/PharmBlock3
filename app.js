@@ -89,7 +89,8 @@ function updateStats() {
 
 function createChip(text, isActive, onClick) {
   const button = document.createElement("button");
-  button.className = `chip${isActive ? " active" : ""}`;
+  button.className = `cat-btn${isActive ? " active" : ""}`;
+  button.type = "button";
   button.textContent = text;
   button.addEventListener("click", onClick);
   return button;

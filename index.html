@@ -7,77 +7,59 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="page-shell">
-    <header class="hero">
-      <p class="eyebrow">Pharmacology Block 3 Matching Quiz</p>
-      <h1>藥理 Block 3 配合題</h1>
-      <p class="hero-copy">以總複習表為底，直接練藥名和高頻資訊的配對。先選藥物群組，再選你想刷的欄位。</p>
-    </header>
+  <header>
+    <h1>藥理 Block 3 配合題</h1>
+    <p>Pharmacology Matching Quiz — 點選左欄線索，再點右欄藥物；上方可切換藥物群組與練習欄位</p>
+  </header>
 
-    <main class="panel">
-      <section class="controls">
-        <div class="control-block">
-          <div class="control-label">藥物群組</div>
-          <div class="chip-row" id="groupChips"></div>
-        </div>
-        <div class="control-block">
-          <div class="control-label">練習欄位</div>
-          <div class="chip-row" id="fieldChips"></div>
-        </div>
-      </section>
+  <div class="filters">
+    <div class="filter-label">藥物群組</div>
+    <div class="categories" id="groupChips"></div>
+    <div class="filter-label">練習欄位</div>
+    <div class="categories secondary" id="fieldChips"></div>
+  </div>
 
-      <section class="toolbar">
-        <button class="tool-btn" id="resetBtn">重新洗牌</button>
-        <button class="tool-btn alt" id="toggleAnswerBtn">顯示答案</button>
-      </section>
+  <div class="toolbar">
+    <button class="tool-btn" id="resetBtn">重新練習</button>
+    <button class="tool-btn answer-btn" id="toggleAnswerBtn">顯示答案</button>
+  </div>
 
-      <section class="status-card">
-        <div class="status-line">
-          <span>目前模式：<b id="modeText"></b></span>
-          <span>進度：<b id="progressText">0 / 0</b></span>
-          <span>錯誤：<b id="errorText">0</b></span>
-        </div>
-        <p class="status-note" id="statusNote"></p>
-      </section>
+  <div class="status-card">
+    <div class="status" id="statusBar">
+      目前模式 <b id="modeText"></b> &nbsp;｜&nbsp; 進度 <b id="progressText">0 / 0</b> &nbsp;｜&nbsp; 錯誤 <b id="errorText">0</b>
+    </div>
+    <div class="status-note" id="statusNote"></div>
+  </div>
 
-      <section class="quiz-view" id="quizView">
-        <div class="grid">
-          <div class="grid-col">
-            <div class="grid-label">線索</div>
-            <div class="tile-col" id="clueCol"></div>
-          </div>
-          <div class="grid-col">
-            <div class="grid-label">藥物名稱</div>
-            <div class="tile-col" id="answerCol"></div>
-          </div>
-        </div>
-      </section>
+  <div class="grid" id="quizView">
+    <div>
+      <div class="col-label">線索 / 提示</div>
+      <div class="col" id="clueCol"></div>
+    </div>
+    <div>
+      <div class="col-label">藥物名稱</div>
+      <div class="col" id="answerCol"></div>
+    </div>
+  </div>
 
-      <section class="answer-view hidden" id="answerView">
-        <div class="answer-heading">
-          <h2>答案總覽</h2>
-          <p id="answerCaption"></p>
-        </div>
-        <div class="table-wrap">
-          <table class="answer-table">
-            <thead>
-              <tr>
-                <th>藥物</th>
-                <th id="fieldHeader">欄位</th>
-                <th>考點速記</th>
-              </tr>
-            </thead>
-            <tbody id="answerBody"></tbody>
-          </table>
-        </div>
-      </section>
-    </main>
+  <div class="result hidden" id="resultCard">
+    <div class="big" id="resultScore">100%</div>
+    <p id="resultText"></p>
+    <button id="playAgainBtn">再試一次</button>
+  </div>
 
-    <section class="result-card hidden" id="resultCard">
-      <div class="result-score" id="resultScore">100%</div>
-      <p class="result-text" id="resultText"></p>
-      <button class="result-btn" id="playAgainBtn">再練一次</button>
-    </section>
+  <div id="answerView" class="hidden">
+    <div class="answer-caption" id="answerCaption"></div>
+    <table class="answer-table">
+      <thead>
+        <tr>
+          <th>藥物</th>
+          <th id="fieldHeader">欄位</th>
+          <th>考點速記</th>
+        </tr>
+      </thead>
+      <tbody id="answerBody"></tbody>
+    </table>
   </div>
 
   <script src="quiz-data.js"></script>
